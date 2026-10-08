@@ -1,2 +1,2 @@
 # Rift
-Engine created with SDL 3
+C-like language
