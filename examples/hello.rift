@@ -1,0 +1,6 @@
+func main(){
+    x : int = 10
+    y := 20
+    
+    print(x+y)
+}
