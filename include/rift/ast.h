@@ -32,10 +32,24 @@ struct VariableDeclaration
     std::unique_ptr<Expression> value;
 };
 
+struct Statement
+{
+    enum class Type
+    {
+        VariableDeclaration,
+        Print
+    };
+
+    Type type;
+
+    std::unique_ptr<VariableDeclaration> variable;
+    std::unique_ptr<Expression> expression;
+};
+
 struct Function
 {
     std::string name;
-    std::vector<VariableDeclaration> variables;
+    std::vector<Statement> statements;
 };
 
 struct Program

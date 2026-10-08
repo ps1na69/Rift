@@ -17,6 +17,8 @@ private:
     void expect(TokenType type);
 
     Function parseFunction();
+    Statement parseStatement();
+    Statement parsePrint();
     VariableDeclaration parseVariable();
 
     std::unique_ptr<Expression> parseExpression();

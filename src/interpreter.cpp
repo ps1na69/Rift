@@ -2,7 +2,6 @@
 
 #include <iostream>
 #include <stdexcept>
-#include <unordered_map>
 
 void Interpreter::run(const Program& program)
 {
@@ -18,17 +17,21 @@ void Interpreter::run(const Program& program)
 
 void Interpreter::runFunction(const Function& function)
 {
-    std::unordered_map<std::string, int> variables;
+    variables_.clear();
 
-    for (const auto& variable : function.variables) {
-        int value = evaluate(*variable.value);
+    for (const auto& statement : function.statements) {
+        if (statement.type == Statement::Type::VariableDeclaration) {
+            const auto& variable = *statement.variable;
 
-        variables[variable.name] = value;
+            int value = evaluate(*variable.value);
 
-        std::cout << variable.name
-            << " = "
-            << value
-            << '\n';
+            variables_[variable.name] = value;
+        }
+        else if (statement.type == Statement::Type::Print) {
+            int value = evaluate(*statement.expression);
+
+            std::cout << value << '\n';
+        }
     }
 }
 
@@ -37,6 +40,19 @@ int Interpreter::evaluate(const Expression& expression)
     switch (expression.type) {
     case Expression::Type::Number:
         return expression.value;
+
+    case Expression::Type::Identifier:
+    {
+        auto it = variables_.find(expression.name);
+
+        if (it == variables_.end()) {
+            throw std::runtime_error(
+                "Undefined variable: " + expression.name
+            );
+        }
+
+        return it->second;
+    }
 
     case Expression::Type::Binary:
     {
@@ -51,11 +67,6 @@ int Interpreter::evaluate(const Expression& expression)
             throw std::runtime_error("Unknown operator");
         }
     }
-
-    case Expression::Type::Identifier:
-        throw std::runtime_error(
-            "Identifier evaluation is not implemented yet"
-        );
     }
 
     throw std::runtime_error("Unknown expression");

@@ -20,13 +20,16 @@ const Token& Parser::consume()
 {
     const Token& token = current();
     position_++;
+
     return token;
 }
 
 void Parser::expect(TokenType type)
 {
     if (current().type != type) {
-        throw std::runtime_error("Unexpected token: " + current().text);
+        throw std::runtime_error(
+            "Unexpected token: " + current().text
+        );
     }
 
     consume();
@@ -70,12 +73,51 @@ Function Parser::parseFunction()
     function.name = name.text;
 
     while (current().type != TokenType::RightBrace) {
-        function.variables.push_back(parseVariable());
+        function.statements.push_back(parseStatement());
     }
 
     expect(TokenType::RightBrace);
 
     return function;
+}
+
+Statement Parser::parseStatement()
+{
+    if (current().type != TokenType::Identifier) {
+        throw std::runtime_error(
+            "Expected statement"
+        );
+    }
+
+    if (current().text == "print") {
+        return parsePrint();
+    }
+
+    Statement statement;
+    statement.type = Statement::Type::VariableDeclaration;
+
+    statement.variable = std::make_unique<VariableDeclaration>(
+        parseVariable()
+    );
+
+    return statement;
+}
+
+Statement Parser::parsePrint()
+{
+    consume(); // print
+
+    expect(TokenType::LeftParen);
+
+    auto expression = parseExpression();
+
+    expect(TokenType::RightParen);
+
+    Statement statement;
+    statement.type = Statement::Type::Print;
+    statement.expression = std::move(expression);
+
+    return statement;
 }
 
 VariableDeclaration Parser::parseVariable()
@@ -111,6 +153,29 @@ VariableDeclaration Parser::parseVariable()
     return variable;
 }
 
+std::unique_ptr<Expression> Parser::parseExpression()
+{
+    auto left = parsePrimary();
+
+    while (current().type == TokenType::Plus) {
+        consume();
+
+        auto right = parsePrimary();
+
+        auto expression = std::make_unique<Expression>();
+
+        expression->type = Expression::Type::Binary;
+        expression->operation = '+';
+
+        expression->left = std::move(left);
+        expression->right = std::move(right);
+
+        left = std::move(expression);
+    }
+
+    return left;
+}
+
 std::unique_ptr<Expression> Parser::parsePrimary()
 {
     const Token& token = current();
@@ -138,27 +203,4 @@ std::unique_ptr<Expression> Parser::parsePrimary()
     }
 
     throw std::runtime_error("Expected expression");
-}
-
-std::unique_ptr<Expression> Parser::parseExpression()
-{
-    auto left = parsePrimary();
-
-    while (current().type == TokenType::Plus) {
-        consume();
-
-        auto right = parsePrimary();
-
-        auto expression = std::make_unique<Expression>();
-
-        expression->type = Expression::Type::Binary;
-        expression->operation = '+';
-
-        expression->left = std::move(left);
-        expression->right = std::move(right);
-
-        left = std::move(expression);
-    }
-
-    return left;
 }

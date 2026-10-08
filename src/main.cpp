@@ -2,9 +2,9 @@
 #include <iostream>
 #include <sstream>
 
+#include "interpreter.h"
 #include "lexer.h"
 #include "parser.h"
-#include "interpreter.h"
 
 int main(int argc, char* argv[])
 {
@@ -35,10 +35,12 @@ int main(int argc, char* argv[])
 
         Interpreter interpreter;
         interpreter.run(program);
-
     }
     catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << '\n';
+        std::cerr << "Error: "
+            << e.what()
+            << '\n';
+
         return 1;
     }
 

@@ -1,4 +1,9 @@
 func main() {
-    x : int = 10 + 20
-    y : int = 5 + 7
+
+    x : int = 1 + 2
+
+    y : int = 20
+
+    print(x+y)
+
 }
