@@ -1,6 +1,4 @@
-func main(){
-    x : int = 10
-    y := 20
-    
-    print(x+y)
+func main() {
+    x : int = 10 + 20
+    y : int = 5 + 7
 }
